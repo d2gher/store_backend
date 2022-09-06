@@ -41,8 +41,9 @@ export class UserStore {
     try {
       const conn = await Client.connect();
       const sql =
-        "INSERT INTO users (fristName, lastName, password) VALUES ($1, $2, $3) RETURNING *";
+        "INSERT INTO users (firstname, lastname, password) VALUES ($1, $2, $3) RETURNING *";
       // Hash password
+      console.log(user.firstName);
       const pepper = process.env.BCRYPT_PASSWORD;
       const salt = process.env.SALT_ROUNDS as string;
       const hash = bcrypt.hashSync(user.password + pepper, parseInt(salt));
@@ -52,7 +53,7 @@ export class UserStore {
         user.lastName,
         hash,
       ]);
-
+      console.log("yay2");
       conn.release();
       return result.rows[0];
     } catch (err) {
