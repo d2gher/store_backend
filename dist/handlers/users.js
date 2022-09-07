@@ -35,8 +35,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
 var users_1 = require("../models/users");
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+var dotenv_1 = __importDefault(require("dotenv"));
+var verifyToken_1 = __importDefault(require("../utiles/verifyToken"));
+dotenv_1["default"].config();
 var Store = new users_1.UserStore();
 var index = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var users;
@@ -50,27 +57,82 @@ var index = function (_req, res) { return __awaiter(void 0, void 0, void 0, func
         }
     });
 }); };
-var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, newUser;
+var show = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var user;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                user = {
-                    user_id: 0,
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    password: req.body.password
-                };
-                return [4 /*yield*/, Store.create(user)];
+            case 0: return [4 /*yield*/, Store.show(req.params.id)];
             case 1:
-                newUser = _a.sent();
-                res.json(newUser);
+                user = _a.sent();
+                if (!user) {
+                    res.json("couldn't find user");
+                }
+                res.json(user);
                 return [2 /*return*/];
         }
     });
 }); };
+var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var user, newUser, token, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                user = {
+                    id: 0,
+                    username: req.body.username,
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    password: req.body.password
+                };
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, Store.create(user)];
+            case 2:
+                newUser = _a.sent();
+                token = jsonwebtoken_1["default"].sign({ user: newUser.id }, process.env.TOKEN_SECRET);
+                res.json(token);
+                return [3 /*break*/, 4];
+            case 3:
+                err_1 = _a.sent();
+                res.status(400);
+                res.json(err_1 + user);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+var authenticate = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var user, token, err_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, Store.authenticate(req.body.username, req.body.password)];
+            case 1:
+                user = _a.sent();
+                if (user) {
+                    token = jsonwebtoken_1["default"].sign({ user: user.id }, process.env.TOKEN_SECRET);
+                    res.json(token);
+                }
+                else {
+                    res.status(401);
+                    res.json("Couldn't verify user");
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_2 = _a.sent();
+                res.status(401);
+                res.json(err_2);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
 var UsersRoutes = function (app) {
-    app.get("/users", index);
+    app.get("/users", verifyToken_1["default"], index);
+    app.get("/users/:id", verifyToken_1["default"], show);
     app.post("/users", create);
+    app.post("/users/authenticate", authenticate);
 };
 exports["default"] = UsersRoutes;

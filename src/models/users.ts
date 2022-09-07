@@ -4,9 +4,12 @@ import bcrypt from "bcrypt";
 
 // Give us access to the enviroment varibles
 dotenv.config();
+const pepper = process.env.BCRYPT_PASSWORD;
+const salt = process.env.SALT_ROUNDS as string;
 
 export type User = {
-  user_id: number;
+  id: number;
+  username: string;
   firstName: string;
   lastName: string;
   password: string;
@@ -30,6 +33,7 @@ export class UserStore {
       const conn = await Client.connect();
       const sql = "SELECT * FROM users WHERE id=($1)";
       const result = await conn.query(sql, [id]);
+      console.log(result.rows[0]);
       conn.release();
       return result.rows[0];
     } catch (err) {
@@ -41,23 +45,36 @@ export class UserStore {
     try {
       const conn = await Client.connect();
       const sql =
-        "INSERT INTO users (firstname, lastname, password) VALUES ($1, $2, $3) RETURNING *";
+        "INSERT INTO users (username, firstname, lastname, password) VALUES ($1, $2, $3, $4) RETURNING *";
       // Hash password
-      console.log(user.firstName);
-      const pepper = process.env.BCRYPT_PASSWORD;
-      const salt = process.env.SALT_ROUNDS as string;
       const hash = bcrypt.hashSync(user.password + pepper, parseInt(salt));
 
       const result = await conn.query(sql, [
+        user.username,
         user.firstName,
         user.lastName,
         hash,
       ]);
-      console.log("yay2");
       conn.release();
       return result.rows[0];
     } catch (err) {
       throw new Error(`Couldn't create user. ${err}`);
     }
+  }
+
+  async authenticate(username: string, password: string): Promise<User | null> {
+    const conn = await Client.connect();
+    const sql = "SELECT * FROM users WHERE username=($1)";
+
+    const result = await conn.query(sql, [username]);
+    if (result.rows.length) {
+      const user = result.rows[0];
+
+      if (bcrypt.compareSync(password + pepper, user.password)) {
+        return user;
+      }
+    }
+
+    return null;
   }
 }

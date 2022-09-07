@@ -45,6 +45,8 @@ var dotenv_1 = __importDefault(require("dotenv"));
 var bcrypt_1 = __importDefault(require("bcrypt"));
 // Give us access to the enviroment varibles
 dotenv_1["default"].config();
+var pepper = process.env.BCRYPT_PASSWORD;
+var salt = process.env.SALT_ROUNDS;
 var UserStore = /** @class */ (function () {
     function UserStore() {
     }
@@ -86,6 +88,7 @@ var UserStore = /** @class */ (function () {
                         return [4 /*yield*/, conn.query(sql, [id])];
                     case 2:
                         result = _a.sent();
+                        console.log(result.rows[0]);
                         conn.release();
                         return [2 /*return*/, result.rows[0]];
                     case 3:
@@ -98,7 +101,7 @@ var UserStore = /** @class */ (function () {
     };
     UserStore.prototype.create = function (user) {
         return __awaiter(this, void 0, void 0, function () {
-            var conn, sql, pepper, salt, hash, result, err_3;
+            var conn, sql, hash, result, err_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -106,26 +109,45 @@ var UserStore = /** @class */ (function () {
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = "INSERT INTO users (firstname, lastname, password) VALUES ($1, $2, $3) RETURNING *";
-                        // Hash password
-                        console.log(user.firstName);
-                        pepper = process.env.BCRYPT_PASSWORD;
-                        salt = process.env.SALT_ROUNDS;
+                        sql = "INSERT INTO users (username, firstname, lastname, password) VALUES ($1, $2, $3, $4) RETURNING *";
                         hash = bcrypt_1["default"].hashSync(user.password + pepper, parseInt(salt));
                         return [4 /*yield*/, conn.query(sql, [
+                                user.username,
                                 user.firstName,
                                 user.lastName,
                                 hash,
                             ])];
                     case 2:
                         result = _a.sent();
-                        console.log("yay2");
                         conn.release();
                         return [2 /*return*/, result.rows[0]];
                     case 3:
                         err_3 = _a.sent();
                         throw new Error("Couldn't create user. ".concat(err_3));
                     case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UserStore.prototype.authenticate = function (username, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, result, user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        sql = "SELECT * FROM users WHERE username=($1)";
+                        return [4 /*yield*/, conn.query(sql, [username])];
+                    case 2:
+                        result = _a.sent();
+                        if (result.rows.length) {
+                            user = result.rows[0];
+                            if (bcrypt_1["default"].compareSync(password + pepper, user.password)) {
+                                return [2 /*return*/, user];
+                            }
+                        }
+                        return [2 /*return*/, null];
                 }
             });
         });

@@ -1,5 +1,6 @@
 import { Request, Response, Application } from "express";
 import { Product, ProductStore } from "../models/products";
+import verifyToken from "../utiles/verifyToken";
 
 const store = new ProductStore();
 
@@ -30,7 +31,7 @@ const create = async (req: Request, res: Response) => {
 const ProductsRoutes = (app: Application) => {
   app.get("/products", index);
   app.get("/products/:id", show);
-  app.post("/products", create);
+  app.post("/products", verifyToken, create);
 };
 
 export default ProductsRoutes;
