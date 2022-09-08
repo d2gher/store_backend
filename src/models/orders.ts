@@ -82,7 +82,6 @@ export class OrderStore {
         "INSERT INTO orders_products (order_id, product_id, quantity) VALUES ($1, $2, $3) RETURNING *";
 
       const result = await conn.query(sql, [order_id, product_id, quantity]);
-      console.log(result.rows[0]);
       conn.release();
       return result.rows[0];
     } catch (err) {
