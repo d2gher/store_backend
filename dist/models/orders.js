@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderStore = void 0;
 const database_1 = __importDefault(require("../database"));
 class OrderStore {
-    async index() {
+    async index(user_id) {
         try {
             const conn = await database_1.default.connect();
-            const sql = "SELECT * FROM orders";
-            const results = await conn.query(sql);
+            const sql = "SELECT * FROM orders where user_id=($1) AND status='active'";
+            const results = await conn.query(sql, [user_id]);
             conn.release();
             return results.rows;
         }

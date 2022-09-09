@@ -10,32 +10,44 @@ const verifyToken_1 = __importDefault(require("../utiles/verifyToken"));
 dotenv_1.default.config();
 const Store = new users_1.UserStore();
 const index = async (_req, res) => {
-    const users = await Store.index();
-    res.json(users);
+    try {
+        const users = await Store.index();
+        res.json(users);
+    }
+    catch (err) {
+        res.status(401);
+        res.json(err);
+    }
 };
 const show = async (req, res) => {
-    const user = await Store.show(req.params.id);
-    if (!user) {
-        res.json("couldn't find user");
+    try {
+        const user = await Store.show(req.params.id);
+        res.json(user);
     }
-    res.json(user);
+    catch (err) {
+        res.status(401);
+        res.json(err);
+    }
 };
 const create = async (req, res) => {
-    const user = {
-        id: 0,
-        username: req.body.username,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        password: req.body.password,
-    };
     try {
+        const user = {
+            id: 0,
+            username: req.body.username,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            password: req.body.password,
+        };
+        if (!user.username || !user.firstName || !user.lastName || !user.password) {
+            throw new Error("Please enter the required params");
+        }
         const newUser = await Store.create(user);
         const token = jsonwebtoken_1.default.sign({ user: newUser.id }, process.env.TOKEN_SECRET);
         res.json(token);
     }
     catch (err) {
-        res.status(400);
-        res.json(err + user);
+        res.status(401);
+        res.json(err);
     }
 };
 const authenticate = async (req, res) => {

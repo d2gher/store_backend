@@ -7,12 +7,24 @@ const products_1 = require("../models/products");
 const verifyToken_1 = __importDefault(require("../utiles/verifyToken"));
 const store = new products_1.ProductStore();
 const index = async (_req, res) => {
-    const products = await store.index();
-    res.json(products);
+    try {
+        const products = await store.index();
+        res.json(products);
+    }
+    catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 const show = async (req, res) => {
-    const product = await store.show(req.params.id);
-    res.json(product);
+    try {
+        const product = await store.show(req.params.id);
+        res.json(product);
+    }
+    catch (err) {
+        res.status(400);
+        res.json(err);
+    }
 };
 const create = async (req, res) => {
     try {
@@ -21,6 +33,9 @@ const create = async (req, res) => {
             name: req.body.name,
             price: parseInt(req.body.price),
         };
+        if (!product.name || !product.price) {
+            throw new Error("Please enter the required params");
+        }
         const newProduct = await store.create(product);
         res.json(newProduct);
     }

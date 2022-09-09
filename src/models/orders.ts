@@ -13,11 +13,11 @@ export type OrderProduct = {
 };
 
 export class OrderStore {
-  async index(): Promise<Order[]> {
+  async index(user_id: number): Promise<Order[]> {
     try {
       const conn = await Client.connect();
-      const sql = "SELECT * FROM orders";
-      const results = await conn.query(sql);
+      const sql = "SELECT * FROM orders where user_id=($1) AND status='active'";
+      const results = await conn.query(sql, [user_id]);
 
       conn.release();
       return results.rows;

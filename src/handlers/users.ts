@@ -9,28 +9,39 @@ dotenv.config();
 const Store = new UserStore();
 
 const index = async (_req: Request, res: Response) => {
-  const users = await Store.index();
-  res.json(users);
+  try {
+    const users = await Store.index();
+    res.json(users);
+  } catch (err) {
+    res.status(401);
+    res.json(err);
+  }
 };
 
 const show = async (req: Request, res: Response) => {
-  const user = await Store.show(req.params.id);
-  if (!user) {
-    res.json("couldn't find user");
+  try {
+    const user = await Store.show(req.params.id);
+    res.json(user);
+  } catch (err) {
+    res.status(401);
+    res.json(err);
   }
-  res.json(user);
 };
 
 const create = async (req: Request, res: Response) => {
-  const user: User = {
-    id: 0,
-    username: req.body.username,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    password: req.body.password,
-  };
-
   try {
+    const user: User = {
+      id: 0,
+      username: req.body.username,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      password: req.body.password,
+    };
+
+    if (!user.username || !user.firstName || !user.lastName || !user.password) {
+      throw new Error("Please enter the required params");
+    }
+
     const newUser = await Store.create(user);
     const token = jwt.sign(
       { user: newUser.id },
@@ -38,8 +49,8 @@ const create = async (req: Request, res: Response) => {
     );
     res.json(token);
   } catch (err) {
-    res.status(400);
-    res.json((err as string) + user);
+    res.status(401);
+    res.json(err);
   }
 };
 

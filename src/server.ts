@@ -4,6 +4,10 @@ import cors from "cors";
 import UsersRoutes from "./handlers/users";
 import ProductsRoutes from "./handlers/products";
 import OrdersRoutes from "./handlers/orders";
+import dotenv from "dotenv";
+
+dotenv.config();
+const { PORT } = process.env;
 
 const app: express.Application = express();
 const address: string = "0.0.0.0:3000";
@@ -24,7 +28,7 @@ UsersRoutes(app);
 ProductsRoutes(app);
 OrdersRoutes(app);
 
-app.listen(3000, function () {
+app.listen(PORT, function () {
   console.log(`starting app on: ${address}`);
 });
 

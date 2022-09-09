@@ -9,9 +9,12 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const store = new orders_1.OrderStore();
-const index = async (_req, res) => {
+const index = async (req, res) => {
     try {
-        const orders = await store.index();
+        const token = req.headers["authorization"];
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.TOKEN_SECRET);
+        // @ts-ignore
+        const orders = await store.index(parseInt(decoded.user));
         res.json(orders);
     }
     catch (err) {
@@ -70,9 +73,9 @@ const addProduct = async (req, res) => {
     }
 };
 const OrdersRoutes = (app) => {
-    app.get("/orders", index);
+    app.get("/orders", verifyToken_1.default, index);
     app.post("/orders", verifyToken_1.default, create);
-    app.get("/orders/:id", show);
+    app.get("/orders/:id", verifyToken_1.default, show);
     // add product to order
     app.get("/orders/:id/products", verifyToken_1.default, getProducts);
     app.post("/orders/:id/products", verifyToken_1.default, addProduct);

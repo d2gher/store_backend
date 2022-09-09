@@ -8,9 +8,12 @@ dotenv.config();
 
 const store = new OrderStore();
 
-const index = async (_req: Request, res: Response) => {
+const index = async (req: Request, res: Response) => {
   try {
-    const orders = await store.index();
+    const token = req.headers["authorization"] as string;
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET as string);
+    // @ts-ignore
+    const orders = await store.index(parseInt(decoded.user));
     res.json(orders);
   } catch (err) {
     res.status(401);
@@ -77,9 +80,9 @@ const addProduct = async (req: Request, res: Response) => {
 };
 
 const OrdersRoutes = (app: Application) => {
-  app.get("/orders", index);
+  app.get("/orders", verifyToken, index);
   app.post("/orders", verifyToken, create);
-  app.get("/orders/:id", show);
+  app.get("/orders/:id", verifyToken, show);
   // add product to order
   app.get("/orders/:id/products", verifyToken, getProducts);
   app.post("/orders/:id/products", verifyToken, addProduct);

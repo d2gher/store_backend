@@ -27,7 +27,7 @@ describe("Orders Model", () => {
         expect(store.index).toBeDefined();
     });
     it("Should return all the orders", async () => {
-        const results = await store.index();
+        const results = await store.index(1);
         expect(results).toEqual([]);
     });
     it("Check that create method is defined", () => {
