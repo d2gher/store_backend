@@ -56,16 +56,21 @@ class UserStore {
         }
     }
     async authenticate(username, password) {
-        const conn = await database_1.default.connect();
-        const sql = "SELECT * FROM users WHERE username=($1)";
-        const result = await conn.query(sql, [username]);
-        if (result.rows.length) {
-            const user = result.rows[0];
-            if (bcrypt_1.default.compareSync(password + pepper, user.password)) {
-                return user;
+        try {
+            const conn = await database_1.default.connect();
+            const sql = "SELECT * FROM users WHERE username=($1)";
+            const result = await conn.query(sql, [username]);
+            if (result.rows.length) {
+                const user = result.rows[0];
+                if (bcrypt_1.default.compareSync(password + pepper, user.password)) {
+                    return user;
+                }
             }
+            return null;
         }
-        return null;
+        catch (err) {
+            throw new Error(`Couldn't login. ${err}`);
+        }
     }
 }
 exports.UserStore = UserStore;

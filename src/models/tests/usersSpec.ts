@@ -9,7 +9,7 @@ describe("Users Model", () => {
 
   it("Should get us a list of the users", async () => {
     const results = await store.index();
-    expect(results.length).toEqual(1);
+    expect(results.length).toEqual(2);
   });
 
   it("Shoud have create method", () => {
@@ -25,7 +25,7 @@ describe("Users Model", () => {
       password: "123456",
     };
     const result = await store.create(user);
-    expect(`${JSON.stringify(result.id)}`).toEqual("2");
+    expect(`${JSON.stringify(result.id)}`).toEqual("3");
   });
 
   it("Shoud have show method", () => {

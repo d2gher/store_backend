@@ -26,20 +26,18 @@ const show = async (req: Request, res: Response) => {
 
 const create = async (req: Request, res: Response) => {
   try {
-    const product: Product = {
-      id: 0,
-      name: req.body.name,
-      price: parseInt(req.body.price),
-    };
-
-    if (!product.name || !product.price) {
+    if (!req.body.name || !parseInt(req.body.price)) {
+      console.log("yay");
       throw new Error("Please enter the required params");
     }
 
-    const newProduct = await store.create(product);
+    const newProduct = await store.create(
+      req.body.name,
+      parseInt(req.body.price)
+    );
     res.json(newProduct);
   } catch (err) {
-    res.status(400);
+    res.status(401);
     res.json(err);
   }
 };

@@ -16,13 +16,7 @@ beforeAll(async () => {
     password: "123456",
   };
   await userStore.create(user);
-
-  const product: Product = {
-    id: 0,
-    name: "test",
-    price: 0,
-  };
-  await productStore.create(product);
+  await productStore.create("test", 0);
 });
 
 describe("Orders Model", () => {

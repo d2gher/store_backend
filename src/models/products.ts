@@ -31,16 +31,12 @@ export class ProductStore {
     }
   }
 
-  async create(product: Product): Promise<Product[]> {
-    try {
-      const conn = await Client.connect();
-      const sql =
-        "INSERT INTO products (name, price) VALUES ($1, $2) RETURNING *";
-      const result = await conn.query(sql, [product.name, product.price]);
-      conn.release();
-      return result.rows[0];
-    } catch (err) {
-      throw new Error(`An error occured during creating product. ${err}`);
-    }
+  async create(name: string, price: number): Promise<Product> {
+    const conn = await Client.connect();
+    const sql =
+      "INSERT INTO products (name, price) VALUES ($1, $2) RETURNING *";
+    const result = await conn.query(sql, [name, price]);
+    conn.release();
+    return result.rows[0];
   }
 }

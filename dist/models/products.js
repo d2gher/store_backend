@@ -30,17 +30,12 @@ class ProductStore {
             throw new Error(`An error occured during fetching product. ${err}`);
         }
     }
-    async create(product) {
-        try {
-            const conn = await database_1.default.connect();
-            const sql = "INSERT INTO products (name, price) VALUES ($1, $2) RETURNING *";
-            const result = await conn.query(sql, [product.name, product.price]);
-            conn.release();
-            return result.rows[0];
-        }
-        catch (err) {
-            throw new Error(`An error occured during creating product. ${err}`);
-        }
+    async create(name, price) {
+        const conn = await database_1.default.connect();
+        const sql = "INSERT INTO products (name, price) VALUES ($1, $2) RETURNING *";
+        const result = await conn.query(sql, [name, price]);
+        conn.release();
+        return result.rows[0];
     }
 }
 exports.ProductStore = ProductStore;

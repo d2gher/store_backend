@@ -9,7 +9,7 @@ describe("Products Model", () => {
 
   it("Should return to us the products table rows", async () => {
     const results = await store.index();
-    expect(results.length).toEqual(1);
+    expect(results.length).toEqual(2);
   });
 
   it("Check that show method is defined ", () => {
@@ -17,15 +17,9 @@ describe("Products Model", () => {
   });
 
   it("Should return to us the products table rows", async () => {
-    const product: Product = {
-      id: 0,
-      name: "test",
-      price: 0,
-    };
-
-    const results = await store.create(product);
+    const results = await store.create("test", 1);
     expect(`${JSON.stringify(results)}`).toEqual(
-      `{"id":2,"name":"test","price":0}`
+      `{"id":3,"name":"test","price":1}`
     );
   });
 
@@ -36,7 +30,7 @@ describe("Products Model", () => {
   it("Should return to us a product", async () => {
     const results = await store.show(2);
     expect(`${JSON.stringify(results)}`).toEqual(
-      `{"id":2,"name":"test","price":0}`
+      `{"id":2,"name":"test","price":1}`
     );
   });
 });
